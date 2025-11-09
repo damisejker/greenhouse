@@ -23,7 +23,7 @@ error_reporting(E_ALL);
 //** КРОН ЗАДАНИЕ НАЧАЛО  ***///
 $isCronJob = (isset($argv[1]) && $argv[1] == 'cron');
 if ($isCronJob) {
-    
+
 $stage = "SELECT * FROM `oranjerie` ORDER BY `id`";
 $oranjerie = mysqli_query($conn, $stage);
 
@@ -44,6 +44,8 @@ while ($rr = mysqli_fetch_array($oranjerie)) {
     $resistance = $rr['resistance'];
     $waterprocent = $rr['water'];
     $total = $rr['totalstages'];
+    $pot_id = $rr['pot_id']; // ID горшка для поддержки множественных горшков
+    $user_login = $rr['login']; // Логин пользователя
 	
 	/*прописываем болезнь*/
 	 //если сегодня рандомайзер не кидали, бросаем
@@ -55,13 +57,16 @@ while ($rr = mysqli_fetch_array($oranjerie)) {
       
 	  // если рандомное число совпадает с загаданным, растение заболевает
 	  if($shuffle == $illness and $pl_stage != 0 and $pl_stage != 1) {
-	      $gettingsick = "UPDATE `oranjerie` SET `dateshuffled` = '$date',  `plantstatus` = '3' WHERE `plantstatus` != 3";
+	      $gettingsick = "UPDATE `oranjerie` SET `dateshuffled` = '$date',  `plantstatus` = '3'
+	                      WHERE `plantstatus` != 3 AND `login`='$user_login' AND `pot_id`='$pot_id'";
 				mysqli_query($conn, $gettingsick);
-	  } 
+	  }
 	  // если однако рандомное число не совпадает, растение не заболевает
 	  else {
 	      // обновляем в базе дату, что сегодня кидали рандом, завтра цикл повторится
-	      $notgettingsick = "UPDATE `oranjerie` SET `dateshuffled` = '$date' WHERE `plantstatus` != 3 and `plant`='$rastenie'";
+	      $notgettingsick = "UPDATE `oranjerie` SET `dateshuffled` = '$date'
+	                         WHERE `plantstatus` != 3 AND `plant`='$rastenie'
+	                         AND `login`='$user_login' AND `pot_id`='$pot_id'";
 				mysqli_query($conn, $notgettingsick);
 	  }
       } 
@@ -133,7 +138,8 @@ if ($result) {
 	  //Если нулевой цикл
         if($plantdate !== $date and $stagedate !== $date and $cycle == 0) {
         //Переходим к первому циклу на следующий день
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = stagenumber+'1', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = stagenumber+'1', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
 				mysqli_query($conn, $isto);
         }
 
@@ -165,19 +171,24 @@ if ($result) {
     // Сверяем сегодняшнюю дату с ожидаемой датой перехода на следующий цикл
 
 if ($cycle == 1 && $secondcycle <= $date) {
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = '2', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = '2', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
         mysqli_query($conn, $isto);
     } elseif ($cycle == 2 && $thirdcycle <= $date) {
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = '3', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = '3', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
         mysqli_query($conn, $isto);
     } elseif ($cycle == 3 && $fourthcycle <= $date) {
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = '4', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = '4', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
         mysqli_query($conn, $isto);
     } elseif ($cycle == 4 && $fifthcycle <= $date) {
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = '5', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = '5', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
         mysqli_query($conn, $isto);
     } elseif ($cycle == 5 && $total == 6 && $sixthcycle <= $date) {
-        $isto = "UPDATE `oranjerie` SET `stagenumber` = '6', `stagedatechange`='$date' WHERE `plant`='$rastenie'";
+        $isto = "UPDATE `oranjerie` SET `stagenumber` = '6', `stagedatechange`='$date'
+                 WHERE `plant`='$rastenie' AND `login`='$user_login' AND `pot_id`='$pot_id'";
         mysqli_query($conn, $isto);
     }
 

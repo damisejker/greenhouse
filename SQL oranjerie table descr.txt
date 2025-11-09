@@ -2,20 +2,25 @@ DESCRIBE `oranjerie`;
 
 
 
-id	int	NO	PRI	NULL	auto_increment	
-login	varchar(255)	NO		NULL		
-plant	varchar(255)	NO		NULL		
-health	int	NO		NULL		
-datehealthchanged	date	NO		NULL		
-water	int	NO		NULL		
-dateplanted	date	NO		NULL		
-datewatered	date	NO		NULL		
-dateshuffled	date	NO		NULL		
-datesprayed	date	NO		NULL		
-waterhunger	date	NO		NULL		
-totalstages	int	NO		NULL		
-stagenumber	int	NO		NULL		
-stagedatechange	date	NO		NULL		
-plantstatus	int	NO		NULL		
-daterotten	date	NO		NULL		
-resistance	int	NO		NULL		
+id	int	NO	PRI	NULL	auto_increment
+login	varchar(255)	NO		NULL
+pot_id	int	NO		1	-- ID горшка (1-5), позволяет иметь несколько горшков
+plant	varchar(255)	NO		NULL
+health	int	NO		NULL
+datehealthchanged	date	NO		NULL
+water	int	NO		NULL
+dateplanted	date	NO		NULL
+datewatered	date	NO		NULL
+dateshuffled	date	NO		NULL
+datesprayed	date	NO		NULL
+waterhunger	date	NO		NULL
+totalstages	int	NO		NULL
+stagenumber	int	NO		NULL
+stagedatechange	date	NO		NULL
+plantstatus	int	NO		NULL		-- 1=здоровое, 2=мертвое, 3=больное
+daterotten	date	NO		NULL
+resistance	int	NO		NULL
+
+INDEXES:
+idx_login_pot (login, pot_id) -- комбинированный индекс для быстрого поиска
+idx_login_pot_status (login, pot_id, plantstatus) -- для фильтрации по статусу
