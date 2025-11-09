@@ -38,32 +38,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $username = $_POST['username'];
         $left = $_POST['left'];
         $top = $_POST['top'];
+        $pot_id = isset($_POST['pot_id']) ? intval($_POST['pot_id']) : 1;
 
-        // Prepare SQL statement to avoid SQL injection
-        $sql = "INSERT INTO pot_positions (username, pot_left, pot_top) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE pot_left = VALUES(pot_left), pot_top = VALUES(pot_top)";
+        // Валидация pot_id (должен быть от 1 до 10)
+        if ($pot_id < 1 || $pot_id > 10) {
+            echo json_encode(['error' => 'Invalid pot_id']);
+            exit;
+        }
+
+        // Обновляем позицию в таблице user_pots
+        $sql = "INSERT INTO user_pots (login, pot_id, pot_left, pot_top)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                pot_left = VALUES(pot_left),
+                pot_top = VALUES(pot_top)";
 
         $stmt = $conn->prepare($sql);
-        
+
         // Check if the statement was prepared successfully
         if ($stmt === false) {
-            die("Error preparing the statement: " . $conn->error);
+            echo json_encode(['error' => "Error preparing the statement: " . $conn->error]);
+            exit;
         }
 
-        $stmt->bind_param("sss", $username, $left, $top);
-        
+        $stmt->bind_param("siss", $username, $pot_id, $left, $top);
+
         if ($stmt->execute()) {
-            echo "Position saved successfully.";
+            echo json_encode(['success' => true, 'message' => "Position saved successfully for pot $pot_id"]);
         } else {
-            echo "Error executing the statement: " . $stmt->error;
+            echo json_encode(['error' => "Error executing the statement: " . $stmt->error]);
         }
-        
+
         $stmt->close();
     } else {
-        echo "Required parameters are missing.";
+        echo json_encode(['error' => 'Required parameters are missing']);
     }
 } else {
     // If not a POST request
-    echo "Invalid request method.";
+    echo json_encode(['error' => 'Invalid request method']);
 }
 ?>
 
