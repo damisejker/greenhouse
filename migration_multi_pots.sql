@@ -59,7 +59,7 @@ ADD UNIQUE KEY `unique_user_pot_position` (`username`, `pot_id`);
 CREATE TABLE IF NOT EXISTS `greenhouse_settings` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `login` VARCHAR(255) NOT NULL UNIQUE,
-  `max_pots` INT NOT NULL DEFAULT 5,
+  `max_pots` INT NOT NULL DEFAULT 3,
   `active_pots` INT NOT NULL DEFAULT 1,
   `last_updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_login` (`login`)
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `greenhouse_settings` (
 
 -- Шаг 7: Инициализируем настройки для всех существующих пользователей
 INSERT INTO `greenhouse_settings` (`login`, `max_pots`, `active_pots`)
-SELECT DISTINCT `login`, 5, 1
+SELECT DISTINCT `login`, 3, 1
 FROM `oranjerie`
 ON DUPLICATE KEY UPDATE `active_pots` = 1;
 
@@ -79,5 +79,5 @@ DROP INDEX IF EXISTS `idx_login`,
 ADD INDEX `idx_login_pot_status` (`login`, `pot_id`, `plantstatus`);
 
 -- Конец миграции
--- Теперь система поддерживает до 5 горшков на пользователя (по умолчанию)
+-- Теперь система поддерживает до 3 горшков на пользователя (по умолчанию)
 -- Каждый горшок имеет свою позицию и может содержать свое растение
