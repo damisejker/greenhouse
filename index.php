@@ -1431,16 +1431,25 @@ while($pot_row = mysqli_fetch_array($all_pots_res)) {
     $user_pots[$pot_row['pot_id']] = $pot_row;
 }
 
+// Обработка добавления нового горшка
+if (isset($_GET['add_pot']) && $_GET['add_pot'] == 'true') {
+    $update_pots = "UPDATE `greenhouse_settings` SET `active_pots` = active_pots + 1 WHERE `login`='$names' AND `active_pots` < `max_pots`";
+    mysqli_query($conn, $update_pots);
+    echo "<script>location.href='index.php';</script>";
+}
+
 // Получаем настройки пользователя
 $settings_sql = "SELECT * FROM `greenhouse_settings` WHERE `login`='$names' LIMIT 1";
 $settings_res = mysqli_query($conn, $settings_sql);
 if(mysqli_num_rows($settings_res)) {
     $settings = mysqli_fetch_array($settings_res);
     $max_pots = $settings['max_pots'];
+    $active_pots = $settings['active_pots'];
 } else {
     // Создаем настройки по умолчанию
     $max_pots = 3;
-    $init_settings = "INSERT INTO `greenhouse_settings` SET `login`='$names', `max_pots`='$max_pots', `active_pots`='1'";
+    $active_pots = 1;
+    $init_settings = "INSERT INTO `greenhouse_settings` SET `login`='$names', `max_pots`='$max_pots', `active_pots`='$active_pots'";
     mysqli_query($conn, $init_settings);
 }
 
@@ -1509,8 +1518,17 @@ $isMobile = strpos($userAgent, 'mobile');
 
 .pot {
   width: 18%;
+  height: 18%;
+  background-image: url(https://magismo.ru/greenhouse/images/pot.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center center;
+  position: fixed;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  display: inline-block;
+  visibility: visible;
   cursor: grab;
-  position: absolute;
 }
 
 .pot:active {
@@ -1530,8 +1548,8 @@ $isMobile = strpos($userAgent, 'mobile');
 </style>
 
 <?php
-// Отображаем все горшки
-for ($pot_id = 1; $pot_id <= $max_pots; $pot_id++) {
+// Отображаем только активные горшки
+for ($pot_id = 1; $pot_id <= $active_pots; $pot_id++) {
     // Получаем позицию горшка
     $pot_position_sql = "SELECT pot_left, pot_top FROM user_pots WHERE login = ? AND pot_id = ?";
     $stmt = $conn->prepare($pot_position_sql);
@@ -1726,13 +1744,12 @@ for ($pot_id = 1; $pot_id <= $max_pots; $pot_id++) {
 
 <!-- Кнопка добавления горшка -->
 <?php
-$active_pots_count = count($user_pots);
-if ($active_pots_count < $max_pots) {
-    echo "<div style='position: fixed; bottom: 20px; left: 20px; z-index: 1000;'>";
-    echo "<a href='#' id='myBtn' style='text-decoration: none;'>";
-    echo "<img src='https://cdn-icons-png.flaticon.com/512/1828/1828817.png' height='60' title='Открыть депозитарий для посадки'>";
+if ($active_pots < $max_pots) {
+    echo "<div style='position: fixed; bottom: 20px; right: 20px; z-index: 1000;'>";
+    echo "<a href='?add_pot=true' style='text-decoration: none;' onclick=\"return confirm('Добавить ещё один горшок?')\">";
+    echo "<img src='https://cdn-icons-png.flaticon.com/512/1828/1828817.png' height='60' title='Добавить горшок'>";
     echo "</a>";
-    echo "<p style='color: #4e2f1a; font-size: 10pt; margin: 5px 0 0 0;'>Горшков: $active_pots_count/$max_pots</p>";
+    echo "<p style='color: #4e2f1a; font-size: 10pt; margin: 5px 0 0 0; text-align: center;'>Горшков: $active_pots/$max_pots</p>";
     echo "</div>";
 }
 ?>
